@@ -70,6 +70,7 @@ public class Msf extends GroupProcessor
 		final int AUCTION_OPEN = 1;
 		final int B = 1;
 		final int ERROR = 2;
+		final int C = 2;
 		final int OK = 3;
 		final int MIN_PRICE_REACHED = 3;
 		final int FINISHED = 4;
@@ -81,128 +82,73 @@ public class Msf extends GroupProcessor
 		item_machine.addTransition(A, new FunctionTransition(
 				new FunctionTree(Equals.instance,
 						new PredicateGet(0),
-						new Constant("send")),A, new ContextAssignment("sendA",new PredicateGet(2)) //,listSend.addAll(new PredicateGet(2)) //ajouter dans une variable de type liste
+						new Constant("send")),A, new ContextAssignment("sendA",new PredicateGet(1)) //,listSend.addAll(new PredicateGet(2)) //ajouter dans une variable de type liste
 				));
+		//item_machine.addTransition(C, new TransitionOtherwise(ERROR));
+		
 		
 		// A:  -> B si c'est un ask complet 
 				item_machine.addTransition(A, new FunctionTransition(
 						new FunctionTree(BooleanFunction.AND_FUNCTION,
 							new FunctionTree(Equals.instance,
 									new PredicateGet(0),
-									new Constant("ask")),							
+									new Constant("ack")),							
 							new FunctionTree(Equals.instance,
-									new PredicateGet(2),
+									new PredicateGet(1),
 									new ContextPlaceholder("sendA"))
-							), B, new ContextAssignment("sendA",null)//,listSend.addAll(new PredicateGet(2)) //ajouter dans une variable de type liste
+							), B//, new ContextAssignment("sendA",null)//,listSend.addAll(new PredicateGet(2)) //ajouter dans une variable de type liste
 							));
+				
+		// B:  -> B si c'est un send 
+		item_machine.addTransition(B, new FunctionTransition(
+				new FunctionTree(Equals.instance,
+						new PredicateGet(0),
+						new Constant("send")),B, new ContextAssignment("sendA",new PredicateGet(1)) //,listSend.addAll(new PredicateGet(2)) //ajouter dans une variable de type liste
+				));
 		
-		/*// A:  -> ERROR si c'est un ask pas conforme 
+		// B:  -> A si c'est un ask complet 
+		item_machine.addTransition(B, new FunctionTransition(
+				new FunctionTree(BooleanFunction.AND_FUNCTION,
+					new FunctionTree(Equals.instance,
+							new PredicateGet(0),
+							new Constant("ack")),							
+					new FunctionTree(Equals.instance,
+							new PredicateGet(1),
+							new ContextPlaceholder("sendA"))
+					), A//, new ContextAssignment("sendA",null)//,listSend.addAll(new PredicateGet(2)) //ajouter dans une variable de type liste
+					));
+		
+		// A:  -> ERROR si c'est un ask pas conforme 
 		item_machine.addTransition(A, new FunctionTransition(
 				new FunctionTree(BooleanFunction.AND_FUNCTION,
 					new FunctionTree(Equals.instance,
 							new PredicateGet(0),
-							new Constant("ask")),
+							new Constant("ack")),
 					new FunctionTree(Negation.instance,
 						new FunctionTree(Equals.instance,
-								new PredicateGet(2),
+								new PredicateGet(1),
 								new ContextPlaceholder("sendA"))
 					)
 					), ERROR
 							));
-		*/
+		
+		// B:  -> ERROR si c'est un ask pas conforme 
+				item_machine.addTransition(B, new FunctionTransition(
+						new FunctionTree(BooleanFunction.AND_FUNCTION,
+							new FunctionTree(Equals.instance,
+									new PredicateGet(0),
+									new Constant("ack")),
+							new FunctionTree(Negation.instance,
+								new FunctionTree(Equals.instance,
+										new PredicateGet(1),
+										new ContextPlaceholder("sendA"))
+							)
+							), ERROR
+									));
+	
 		
 				
-		/*		
-		// 1: createAuction(_,X,Y) -> 1 / lastPrice := 0, minPrice := X, daysLeft := Y 
-		item_machine.addTransition(NO_AUCTION, new FunctionTransition(
-				new FunctionTree(Equals.instance,
-						new PredicateGet(0),
-						new Constant("create_auction")), AUCTION_OPEN,
-				new ContextAssignment("lastPrice", new Constant(0)),
-				new ContextAssignment("minPrice", new FunctionTree(NumberCast.instance, new PredicateGet(2))),
-				new ContextAssignment("daysLeft", new FunctionTree(NumberCast.instance, new PredicateGet(3)))));
-		item_machine.addTransition(NO_AUCTION, new TransitionOtherwise(ERROR));
-		// 1: endOfDay & daysLeft = 1 -> 0
-		item_machine.addTransition(AUCTION_OPEN, new FunctionTransition(
-				new FunctionTree(BooleanFunction.AND_FUNCTION,
-						new FunctionTree(Equals.instance,
-								new PredicateGet(0),
-								new Constant("endOfDay")),
-						new FunctionTree(Equals.instance,
-								new ContextPlaceholder("daysLeft"),
-								new Constant(1f))), NO_AUCTION));
-		// 1: endOfDay & daysLeft > 1 -> 1 / daysLeft := daysLeft - 1
-		item_machine.addTransition(AUCTION_OPEN, new FunctionTransition(
-				new FunctionTree(BooleanFunction.AND_FUNCTION,
-						new FunctionTree(Equals.instance,
-								new PredicateGet(0),
-								new Constant("endOfDay")),
-								new FunctionTree(IsGreaterThan.instance,
-										new ContextPlaceholder("daysLeft"),
-										new Constant(1f))), AUCTION_OPEN,
-						new ContextAssignment("daysLeft", new FunctionTree(Subtraction.instance,
-								new ContextPlaceholder("daysLeft"), new Constant(1)))));
-		// 1: bid(_X) & X < minPrice & x > lastPrice -> 1 / lastPrice := X
-		item_machine.addTransition(AUCTION_OPEN, new FunctionTransition(
-				new FunctionTree(BooleanFunction.AND_FUNCTION,
-						new FunctionTree(Equals.instance,
-								new PredicateGet(0),
-								new Constant("bid")),
-						new FunctionTree(BooleanFunction.AND_FUNCTION,
-								new FunctionTree(IsGreaterThan.instance,
-										new PredicateGetNumber(2),
-										new ContextPlaceholder("lastPrice")),
-								new FunctionTree(IsLessThan.instance,
-												new PredicateGetNumber(2),
-												new ContextPlaceholder("minPrice"))
-										)), AUCTION_OPEN,
-				new ContextAssignment("lastPrice", new PredicateGetNumber(2))));
-		// 1: bid(_X) & X >= minPrice & x > lastPrice -> 3
-		item_machine.addTransition(AUCTION_OPEN, new FunctionTransition(
-				new FunctionTree(BooleanFunction.AND_FUNCTION,
-						new FunctionTree(Equals.instance,
-								new PredicateGet(0),
-								new Constant("bid")),
-						new FunctionTree(BooleanFunction.AND_FUNCTION,
-								new FunctionTree(IsGreaterThan.instance,
-										new PredicateGetNumber(2),
-										new ContextPlaceholder("lastPrice")),
-								new FunctionTree(IsGreaterOrEqual.instance,
-												new PredicateGetNumber(2),
-												new ContextPlaceholder("minPrice"))
-										)), MIN_PRICE_REACHED,
-				new ContextAssignment("lastPrice", new PredicateGetNumber(2))));
-		item_machine.addTransition(AUCTION_OPEN, new TransitionOtherwise(ERROR));
-		item_machine.addTransition(ERROR, new TransitionOtherwise(ERROR));
-		// 3: bid(_X) & X >= minPrice & x > lastPrice -> 3
-		item_machine.addTransition(MIN_PRICE_REACHED, new FunctionTransition(
-				new FunctionTree(BooleanFunction.AND_FUNCTION,
-						new FunctionTree(Equals.instance,
-								new PredicateGet(0),
-								new Constant("bid")),
-						new FunctionTree(BooleanFunction.AND_FUNCTION,
-								new FunctionTree(IsGreaterThan.instance,
-										new PredicateGetNumber(2),
-										new ContextPlaceholder("lastPrice")),
-								new FunctionTree(IsGreaterOrEqual.instance,
-												new PredicateGetNumber(2),
-												new ContextPlaceholder("minPrice"))
-										)), MIN_PRICE_REACHED,
-				new ContextAssignment("lastPrice", new PredicateGetNumber(2))));
-
-		// 3: endOfDay -> 3
-		item_machine.addTransition(MIN_PRICE_REACHED, new FunctionTransition(new FunctionTree(Equals.instance,
-				new PredicateGet(0),
-				new Constant("endOfDay")), MIN_PRICE_REACHED));
-		item_machine.addTransition(MIN_PRICE_REACHED, new TransitionOtherwise(ERROR));
-		item_machine.addTransition(FINISHED, new TransitionOtherwise(FINISHED));
-		item_machine.addSymbol(NO_AUCTION, Troolean.Value.TRUE);
-		item_machine.addSymbol(AUCTION_OPEN, Troolean.Value.TRUE);
-		item_machine.addSymbol(ERROR, "false"); // A string is used to indicate cleanup
-		item_machine.addSymbol(MIN_PRICE_REACHED, Troolean.Value.FALSE); // If price reached, must be sold
-		item_machine.addSymbol(FINISHED, "true"); // A string is used to indicate cleanup
-		*/
-		//item_machine.addSymbol(ERROR, "false");
+		item_machine.addSymbol(C, "false");
 		item_machine.addSymbol(ERROR, Troolean.Value.FALSE);
 		item_machine.addSymbol(A, Troolean.Value.INCONCLUSIVE);
 		item_machine.addSymbol(B, Troolean.Value.INCONCLUSIVE);
