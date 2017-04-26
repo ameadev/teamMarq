@@ -17,7 +17,7 @@ public class Benchmark1 {
 
 	public static void main(String[] args) throws FileNotFoundException, ConnectorException {
 		// TODO Auto-generated method stub
-		String filename = "/home/mewena/workspace/BB/Mab/qea/examples/rv16/logForBeepBeep.csv";
+		String filename = "/home/mewena/workspace/BB/Mab/qea/examples/rv16/logForBeepBeepM.csv";
 		runAndCollectMarq(new Msf(), filename);
 	}
 	
@@ -52,6 +52,7 @@ public class Benchmark1 {
 		else if (o == Troolean.Value.TRUE || o == Troolean.Value.INCONCLUSIVE)
 		{
 			out.append("Satisfied");
+			//out.append("lol");
 		}
 		else if (o == Troolean.Value.FALSE)
 		{

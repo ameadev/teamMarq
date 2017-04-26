@@ -55,13 +55,7 @@ import ca.uqac.lif.cep.numbers.Subtraction;
 public class Msf extends GroupProcessor
 {
 	public StateSlicer slicer;
-	ArrayList <String> listSend = new ArrayList();
-	
-	public void addToListSend (String msg)
-	{
-		this.listSend.add(msg);
-	}
-	
+
 	public Msf() throws ConnectorException, FileNotFoundException
 	{
 		super(1, 1);
@@ -70,25 +64,38 @@ public class Msf extends GroupProcessor
 		final int AUCTION_OPEN = 1;
 		final int B = 1;
 		final int ERROR = 2;
-		final int C = 2;
+		final int C = 1;
 		final int OK = 3;
 		final int MIN_PRICE_REACHED = 3;
 		final int FINISHED = 4;
-		//InputStream stream = new FileInputStream("/home/mewena/workspace/BB/Mab/qea/examples/rv16/logForBeepBeep.csv");
-		//LineReader reader = new LineReader(stream); 
+		
+		FunctionBenchmark1 isLogic = new FunctionBenchmark1();
 		PredicateTupleReader reader = new PredicateTupleReader();
 		MooreMachine item_machine = new MooreMachine(1, 1);
 		// A:  -> A si c'est un send 
-		item_machine.addTransition(A, new FunctionTransition(
-				new FunctionTree(Equals.instance,
-						new PredicateGet(0),
-						new Constant("send")),A, new ContextAssignment("sendA",new PredicateGet(1)) //,listSend.addAll(new PredicateGet(2)) //ajouter dans une variable de type liste
-				));
-		//item_machine.addTransition(C, new TransitionOtherwise(ERROR));
-		
-		
-		// A:  -> B si c'est un ask complet 
 				item_machine.addTransition(A, new FunctionTransition(
+						new FunctionTree(Equals.instance,
+								new Constant("KO"),
+								isLogic.benchmark1Logic(new PredicateGet(0),new PredicateGet(1))
+								),A
+						));
+
+				/*item_machine.addTransition(A, new FunctionTransition(
+						new FunctionTree(Equals.instance,
+								new PredicateGet(0),
+								new Constant("send")),A, new ContextAssignment("sendA",new PredicateGet(1)) //,listSend.addAll(new PredicateGet(2)) //ajouter dans une variable de type liste
+						));*/
+				//item_machine.addTransition(C, new TransitionOtherwise(ERROR));
+				
+				
+				// A:  -> B si c'est un ask complet 
+				item_machine.addTransition(A, new FunctionTransition(
+						new FunctionTree(Equals.instance,
+								new Constant("OK"),
+								isLogic.benchmark1Logic(new PredicateGet(0),new PredicateGet(1))
+								),B
+						));
+				/*item_machine.addTransition(A, new FunctionTransition(
 						new FunctionTree(BooleanFunction.AND_FUNCTION,
 							new FunctionTree(Equals.instance,
 									new PredicateGet(0),
@@ -96,44 +103,49 @@ public class Msf extends GroupProcessor
 							new FunctionTree(Equals.instance,
 									new PredicateGet(1),
 									new ContextPlaceholder("sendA"))
-							), B//, new ContextAssignment("sendA",null)//,listSend.addAll(new PredicateGet(2)) //ajouter dans une variable de type liste
-							));
-				
-		// B:  -> B si c'est un send 
-		item_machine.addTransition(B, new FunctionTransition(
-				new FunctionTree(Equals.instance,
-						new PredicateGet(0),
-						new Constant("send")),B, new ContextAssignment("sendA",new PredicateGet(1)) //,listSend.addAll(new PredicateGet(2)) //ajouter dans une variable de type liste
-				));
-		
-		// B:  -> A si c'est un ask complet 
-		item_machine.addTransition(B, new FunctionTransition(
-				new FunctionTree(BooleanFunction.AND_FUNCTION,
-					new FunctionTree(Equals.instance,
-							new PredicateGet(0),
-							new Constant("ack")),							
-					new FunctionTree(Equals.instance,
-							new PredicateGet(1),
-							new ContextPlaceholder("sendA"))
-					), A//, new ContextAssignment("sendA",null)//,listSend.addAll(new PredicateGet(2)) //ajouter dans une variable de type liste
-					));
-		
-		// A:  -> ERROR si c'est un ask pas conforme 
-		item_machine.addTransition(A, new FunctionTransition(
-				new FunctionTree(BooleanFunction.AND_FUNCTION,
-					new FunctionTree(Equals.instance,
-							new PredicateGet(0),
-							new Constant("ack")),
-					new FunctionTree(Negation.instance,
-						new FunctionTree(Equals.instance,
-								new PredicateGet(1),
-								new ContextPlaceholder("sendA"))
-					)
-					), ERROR
-							));
-		
-		// B:  -> ERROR si c'est un ask pas conforme 
+							), B//, new ContextAssignment("sendA",new Constant(""))//,listSend.addAll(new PredicateGet(2)) //ajouter dans une variable de type liste
+							));*/
+						
+				// B:  -> B si c'est un send 
 				item_machine.addTransition(B, new FunctionTransition(
+						new FunctionTree(Equals.instance,
+								new Constant("KO"),
+								isLogic.benchmark1Logic(new PredicateGet(0),new PredicateGet(1))
+								),B
+						));
+				/*item_machine.addTransition(B, new FunctionTransition(
+						new FunctionTree(Equals.instance,
+								new PredicateGet(0),
+								new Constant("send")),B, new ContextAssignment("sendA",new PredicateGet(1)) //,listSend.addAll(new PredicateGet(2)) //ajouter dans une variable de type liste
+						));*/
+				
+				// B:  -> A si c'est un ask complet 
+				item_machine.addTransition(B, new FunctionTransition(
+						new FunctionTree(Equals.instance,
+								new Constant("OK"),
+								isLogic.benchmark1Logic(new PredicateGet(0),new PredicateGet(1))
+								),A
+						));
+				/*item_machine.addTransition(B, new FunctionTransition(
+						new FunctionTree(BooleanFunction.AND_FUNCTION,
+							new FunctionTree(Equals.instance,
+									new PredicateGet(0),
+									new Constant("ack")),							
+							new FunctionTree(Equals.instance,
+									new PredicateGet(1),
+									new ContextPlaceholder("sendA"))
+							), A//, new ContextAssignment("sendA",null)//,listSend.addAll(new PredicateGet(2)) //ajouter dans une variable de type liste
+							));*/
+				
+				// A:  -> ERROR si c'est un ask pas conforme 
+				item_machine.addTransition(A, new FunctionTransition(
+						new FunctionTree(Equals.instance,
+								new Constant("NOK"),
+								//isLogic.benchmark1Logic(new PredicateGet(0),new PredicateGet(1))
+								isLogic.benchmark1Logic(new String("ack"),new String("lol"))
+								),ERROR
+						));
+				/*item_machine.addTransition(A, new FunctionTransition(
 						new FunctionTree(BooleanFunction.AND_FUNCTION,
 							new FunctionTree(Equals.instance,
 									new PredicateGet(0),
@@ -144,19 +156,47 @@ public class Msf extends GroupProcessor
 										new ContextPlaceholder("sendA"))
 							)
 							), ERROR
-									));
+									));*/ 
+				//item_machine.addTransition(A, new TransitionOtherwise(ERROR));
+				
+				// B:  -> ERROR si c'est un ask pas conforme 
+				item_machine.addTransition(B, new FunctionTransition(
+						new FunctionTree(Equals.instance,
+								new Constant("NOK"),
+								isLogic.benchmark1Logic(new PredicateGet(0),new PredicateGet(1))
+								),ERROR
+						));
+				/*item_machine.addTransition(B, new FunctionTransition(
+						new FunctionTree(BooleanFunction.AND_FUNCTION,
+							new FunctionTree(Equals.instance,
+									new PredicateGet(0),
+									new Constant("ack")),
+							new FunctionTree(Negation.instance,
+								new FunctionTree(Equals.instance,
+										new PredicateGet(1),
+										new ContextPlaceholder("sendA"))
+							)
+							), ERROR
+									));*/
+			
+				
 	
 		
 				
-		item_machine.addSymbol(C, "false");
+		item_machine.addSymbol(C, Troolean.Value.FALSE);
 		item_machine.addSymbol(ERROR, Troolean.Value.FALSE);
 		item_machine.addSymbol(A, Troolean.Value.INCONCLUSIVE);
 		item_machine.addSymbol(B, Troolean.Value.INCONCLUSIVE);
-		
+		/*
 		Function cleanup = new FunctionTree(BooleanFunction.OR_FUNCTION,
 				new FunctionTree(Equals.instance, new Constant("true"), new ArgumentPlaceholder(0)),
 				new FunctionTree(Equals.instance, new Constant("false"), new ArgumentPlaceholder(0)));
 		StateSlicer slicer = new StateSlicer(new PredicateGet(1), item_machine, cleanup);
+		*/
+		
+		//Function sendAck = new FunctionTree(Equals.instance, new Constant("send"), new PredicateGet(0));  
+		//StateSlicer slicer = new StateSlicer(sendAck, item_machine);
+		StateSlicer slicer = new StateSlicer(new PredicateGet(1), item_machine);
 		Connector.connect(reader, slicer);
 		FunctionProcessor and = new FunctionProcessor(ArrayAnd.instance);
 		Connector.connect(slicer, and);
