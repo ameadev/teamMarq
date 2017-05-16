@@ -1,4 +1,4 @@
-package Benchmark;
+package bench2;
 
 import java.io.File;
 import java.io.FileReader;
@@ -29,7 +29,7 @@ import ca.uqac.lif.cep.numbers.IsGreaterOrEqual;
 import ca.uqac.lif.cep.sets.CsvToList;
 import ca.uqac.lif.cep.tmf.StateSlicer;
 
-public class Benchmark1 {
+public class Benchmark2 {
 	public static void main(String[] args) throws IOException, ConnectorException{
 		// Send, P1, P2, S1
 		final int START = 0;
@@ -127,7 +127,7 @@ public class Benchmark1 {
 		Connector.connect(readerFSM, slicer);
 		
 		LineReader reader = new LineReader(new File("logForBeepBeep.csv"));
-		LineReader.s_printStatus = true; // Print status line
+		//LineReader.s_printStatus = true; // Print status line
 		FunctionProcessor feeder = new FunctionProcessor(CsvToList.instance);
 		
 		Connector.connect(reader, feeder, slicer);

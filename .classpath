@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Apache"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/CoreTest"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Fol"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Fsm"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Gnuplot"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Json"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Ltl"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Signal"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Tuples"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/WebSocket"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Xml"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
